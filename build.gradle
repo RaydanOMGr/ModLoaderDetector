@@ -13,3 +13,32 @@ repositories {
 dependencies {
     implementation "com.google.code.gson:gson:2.8.6"
 }
+
+jar {
+    from('LICENSE') {
+        into('')
+    }
+
+    manifest {
+        attributes "Main-Class": "me.andreasmelone.modloaderdetector.standalone.Main"
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            name = "radRepoPublic"
+            url = uri("https://maven.radsteve.net/public")
+            credentials {
+                username = System.getenv("MAVEN_USER")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
+    }
+}

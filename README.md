@@ -15,15 +15,16 @@ Parses the manifest JSON file into an object that lets you easily retrieve the f
 
 ### Gradle Dependency
 
-Currently, the library is not hosted in any maven repository, but you can use it if you locally install it by running the following:
-```bash
-./gradlew publishToMavenLocal
-```
-
-and then add it to your dependencies:
 ```gradle
+repositories {
+    maven {
+        name "radRepo"
+        url "https://maven.radsteve.net/public"
+    }
+}
+
 dependencies {
-    implementation 'me.andreasmelone:modloader-detector:1.0.0'
+    implementation("me.andreasmelone:modloader-detector:1.0.0")
 }
 ```
 
