@@ -2,6 +2,7 @@ package me.andreasmelone.modloaderdetector.util;
 
 import com.google.gson.*;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -86,24 +87,64 @@ public class Util {
         if (!expectedMainClass.equals(mainClass)) return false;
 
         Optional<JsonElement> argsObj = findValidValue(json, "arguments", JsonElement::isJsonObject);
-        if (argsObj.isEmpty()) return false;
+        if (!argsObj.isPresent()) return false;
 
         Optional<JsonElement> gameArgs = findValidValue(argsObj.get().getAsJsonObject(), "game", JsonElement::isJsonArray);
-        if (gameArgs.isEmpty()) return false;
+        if (!gameArgs.isPresent()) return false;
 
         JsonArray args = gameArgs.get().getAsJsonArray();
+        return Objects.equals(getArgument(args, "--launchTarget"), expectedLaunchTarget);
+    }
+
+    /**
+     * Retrieves the value associated with a specific argument from a command-line style argument array.
+     * <p>
+     * For example: {@code getArgument(new String[] {"--launchTarget", "forgeclient"}, "--launchTarget")}
+     * returns {@code "forgeclient"}.
+     * <p>
+     * This method assumes arguments are provided in pairs, where each flag (like {@code --launchTarget})
+     * is immediately followed by its corresponding value.
+     *
+     * @param args the array of arguments, typically in "--key value" pairs
+     * @param target the specific argument key to search for (e.g., "--launchTarget")
+     * @return the value associated with the target argument, or {@code null} if not found or target is last
+     */
+    public static String getArgument(String[] args, String target) {
+        for (int i = 0; i < args.length - 1; i++) {
+            String current = args[i];
+            String next = args[i + 1];
+
+            if (current.equals(target)) {
+                return next;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves the value associated with a specific argument from a command-line style argument {@link JsonArray}.
+     * <p>
+     * For example: {@code getArgument(GSON.fromJson("[\"--launchTarget\", \"forgeclient\"]", JsonArray.class), "--launchTarget")}
+     * returns {@code "forgeclient"}.
+     * <p>
+     * This method assumes arguments are provided in pairs, where each flag (like {@code --launchTarget})
+     * is immediately followed by its corresponding value.
+     *
+     * @param args   the {@link JsonArray} of arguments, typically in "--key value" pairs
+     * @param target the specific argument key to search for (e.g., "--launchTarget")
+     * @return the value associated with the target argument, or {@code null} if not found or target is last
+     */
+    public static String getArgument(JsonArray args, String target) {
         for (int i = 0; i < args.size() - 1; i++) {
             JsonElement current = args.get(i);
             JsonElement next = args.get(i + 1);
 
             if (current.isJsonPrimitive() && current.getAsJsonPrimitive().isString()
-                    && current.getAsString().equals("--launchTarget")
-                    && next.isJsonPrimitive() && next.getAsJsonPrimitive().isString()
-                    && next.getAsString().equals(expectedLaunchTarget)) {
-                return true;
+                    && current.getAsString().equals(target)
+                    && next.isJsonPrimitive() && next.getAsJsonPrimitive().isString()) {
+                return next.getAsString();
             }
         }
-
-        return false;
+        return null;
     }
 }

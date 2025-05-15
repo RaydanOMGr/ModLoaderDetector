@@ -2,6 +2,7 @@ package me.andreasmelone.modloaderdetector.standalone;
 
 import com.google.gson.JsonSyntaxException;
 import me.andreasmelone.modloaderdetector.ModLoader;
+import me.andreasmelone.modloaderdetector.ModLoaderData;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,20 +13,30 @@ public class Main {
         File[] currentFiles = new File(".").listFiles();
         assert currentFiles != null;
         for(File file : currentFiles) {
-            if (!file.getName().endsWith(".json") || !file.isFile()) return;
+            if (!file.getName().endsWith(".json") || !file.isFile()) continue;
 
             try {
-                Optional<ModLoader> modLoader = ModLoader.findModLoader(file);
+                Optional<ModLoaderData> modLoader = ModLoader.findModLoader(file);
                 if(modLoader.isPresent()) {
-                    System.out.println("Detected " + modLoader.get().name() + " in " + file.getName() + "!");
+                    ModLoaderData data = modLoader.get();
+                    String knownText = data.getMinecraftVersionType().isKnown() ? "" : " (unknown)";
+
+                    System.out.println(file.getName() + ":");
+                    System.out.println("\tMinecraft version: " + data.getMinecraftVersion());
+                    System.out.println("\tMinecraft version type" + knownText + ": " + data.getMinecraftVersionType());
+                    System.out.println("\tLoader: " + data.getLoader());
+                    System.out.println("\tLoader version: " + data.getLoaderVersion());
                 } else {
                     System.out.println(file.getName() + " contains no known loader.");
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             } catch (JsonSyntaxException e) {
                 System.out.println(file.getName() + " is an invalid json and the loader cannot be identified.");
+            } catch (IOException e) {
+                // what a party-killer
+                System.out.println(file.getName() + " cannot be loaded.");
+                e.printStackTrace();
             }
+            System.out.println();
         }
     }
 }
