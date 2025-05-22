@@ -29,7 +29,7 @@ public final class VersionType {
      */
     private static VersionType register(String name) {
         VersionType type = new VersionType(name, true);
-        knownTypes.put(name.toUpperCase(Locale.ROOT), type);
+        knownTypes.put(name.toLowerCase(Locale.ROOT), type);
         return type;
     }
 
@@ -41,8 +41,8 @@ public final class VersionType {
      */
     public static VersionType from(String name) {
         return knownTypes.getOrDefault(
-                name,
-                new VersionType(name, false)
+                name.toLowerCase(Locale.ROOT),
+                new VersionType(name.toLowerCase(Locale.ROOT), false)
         );
     }
 
