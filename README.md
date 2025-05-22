@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    implementation("me.andreasmelone:modloader-detector:1.0.0")
+    implementation("me.andreasmelone:modloader-detector:1.1.1")
 }
 ```
 
