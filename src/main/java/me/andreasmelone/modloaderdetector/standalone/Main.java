@@ -19,7 +19,8 @@ public class Main {
                 Optional<ModLoaderData> modLoader = ModLoader.findModLoader(file);
                 if(modLoader.isPresent()) {
                     ModLoaderData data = modLoader.get();
-                    String knownText = data.getMinecraftVersionType().isKnown() ? "" : " (unknown)";
+                    String knownText = " (unknown)";
+                    if(data.getMinecraftVersionType() != null && data.getMinecraftVersionType().isKnown()) knownText = "";
 
                     System.out.println(file.getName() + ":");
                     System.out.println("\tMinecraft version: " + data.getMinecraftVersion());
@@ -27,7 +28,7 @@ public class Main {
                     System.out.println("\tLoader: " + data.getLoader());
                     System.out.println("\tLoader version: " + data.getLoaderVersion());
                 } else {
-                    System.out.println(file.getName() + " contains no known loader.");
+                    System.out.println(file.getName() + " contains no data to identify the loader or version.");
                 }
             } catch (JsonSyntaxException e) {
                 System.out.println(file.getName() + " is an invalid json and the loader cannot be identified.");

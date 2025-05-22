@@ -3,6 +3,7 @@ package me.andreasmelone.modloaderdetector.versionjson;
 import java.util.List;
 
 // This class is here just so I don't need to manually traverse and type check the JsonObject, which is a pain in the ass
+// it only contains stuff that is actually needed
 public class MinecraftVersionJson {
     private String id;
     private String inheritsFrom;
@@ -36,15 +37,10 @@ public class MinecraftVersionJson {
     }
 
     public static class Arguments {
-        private List<String> game;
-        private List<String> jvm;
+        private List<Argument> game;
 
-        public List<String> getGame() {
+        public List<Argument> getGame() {
             return game;
-        }
-
-        public List<String> getJvm() {
-            return jvm;
         }
     }
 

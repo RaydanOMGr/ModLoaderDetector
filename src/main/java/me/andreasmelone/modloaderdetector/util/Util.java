@@ -1,13 +1,19 @@
 package me.andreasmelone.modloaderdetector.util;
 
 import com.google.gson.*;
+import me.andreasmelone.modloaderdetector.versionjson.Argument;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
 public class Util {
-    public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    public static final Gson GSON = new GsonBuilder()
+            .setPrettyPrinting()
+            .registerTypeAdapter(Argument.class, new Argument.Serializer())
+            .create();
 
     /**
      * Finds a value by key in a {@link JsonObject}.
@@ -146,5 +152,19 @@ public class Util {
             }
         }
         return null;
+    }
+
+    /**
+     * Takes a List of {@link Argument} and turns it into a String array, here referred to as flattening, by taking the values and adding them into the same list.
+     *
+     * @param argumentList The List of {@link Argument} that must be turned into a String array.
+     * @return The resulting String array with all the arguments
+     */
+    public static String[] flattenArgumentList(List<Argument> argumentList) {
+        List<String> string = new ArrayList<>();
+        argumentList.forEach(arg -> {
+            string.addAll(arg.getValues());
+        });
+        return string.toArray(new String[0]);
     }
 }

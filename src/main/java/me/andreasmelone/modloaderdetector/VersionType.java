@@ -41,8 +41,8 @@ public final class VersionType {
      */
     public static VersionType from(String name) {
         return knownTypes.getOrDefault(
-                name.toUpperCase(Locale.ROOT),
-                new VersionType(name.toUpperCase(Locale.ROOT), false)
+                name,
+                new VersionType(name, false)
         );
     }
 

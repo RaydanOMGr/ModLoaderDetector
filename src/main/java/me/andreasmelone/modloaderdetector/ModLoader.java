@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import me.andreasmelone.modloaderdetector.util.MavenDependency;
 import me.andreasmelone.modloaderdetector.versionjson.MinecraftVersionJson;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,12 +25,13 @@ public enum ModLoader {
      */
     FORGE {
         @Override
+        @NotNull
         protected Optional<ModLoaderData> getModLoaderData(JsonObject json) {
             if(!hasLaunchTarget(json,
                     "cpw.mods.bootstraplauncher.BootstrapLauncher",
                     "forgeclient")) return Optional.empty();
             MinecraftVersionJson version = GSON.fromJson(json, MinecraftVersionJson.class);
-            String neoVersion = getArgument(version.getArguments().getGame().toArray(new String[0]), "--fml.forgeVersion");
+            String neoVersion = getArgument(flattenArgumentList(version.getArguments().getGame()), "--fml.forgeVersion");
             return Optional.of(new ModLoaderData(
                     version.getInheritsFrom(),
                     VersionType.from(version.getType()),
@@ -44,12 +46,13 @@ public enum ModLoader {
      */
     NEOFORGE {
         @Override
+        @NotNull
         protected Optional<ModLoaderData> getModLoaderData(JsonObject json) {
             if(!hasLaunchTarget(json,
                     "cpw.mods.bootstraplauncher.BootstrapLauncher",
                     "neoforgeclient")) return Optional.empty();
             MinecraftVersionJson version = GSON.fromJson(json, MinecraftVersionJson.class);
-            String neoVersion = getArgument(version.getArguments().getGame().toArray(new String[0]), "--fml.neoForgeVersion");
+            String neoVersion = getArgument(flattenArgumentList(version.getArguments().getGame()), "--fml.neoForgeVersion");
             return Optional.of(new ModLoaderData(
                     version.getInheritsFrom(),
                     VersionType.from(version.getType()),
@@ -64,6 +67,7 @@ public enum ModLoader {
      */
     FABRIC {
         @Override
+        @NotNull
         protected Optional<ModLoaderData> getModLoaderData(JsonObject json) {
             final String fabricGroup = "net.fabricmc";
             final String fabricArtifact = "fabric-loader";
@@ -97,6 +101,7 @@ public enum ModLoader {
      */
     QUILT {
         @Override
+        @NotNull
         protected Optional<ModLoaderData> getModLoaderData(JsonObject json) {
             final String quiltGroup = "org.quiltmc";
             final String quiltArtifact = "quilt-loader";
@@ -126,6 +131,7 @@ public enum ModLoader {
      */
     LEGACY_FORGE {
         @Override
+        @NotNull
         protected Optional<ModLoaderData> getModLoaderData(JsonObject json) {
             final String forgeGroup = "net.minecraftforge";
             final String forgeArtifact = "forge";
@@ -159,6 +165,29 @@ public enum ModLoader {
                 );
             });
         }
+    },
+    /**
+     * Either vanilla or a modified version of an unknown loader. This element will always be the last in the enum.
+     * This never provides a loaderVersion, but will attempt to tell you the minecraft version if vanilla.
+     * Essentially, this is a fallback.
+     */
+    UNKNOWN {
+        @Override
+        @NotNull
+        protected Optional<ModLoaderData> getModLoaderData(JsonObject json) {
+            MinecraftVersionJson version = GSON.fromJson(json, MinecraftVersionJson.class);
+            String v = null;
+            if(version.getId() != null) v = version.getId();
+            if(version.getInheritsFrom() != null) v = version.getInheritsFrom();
+            if(version.getType() == null || v == null) return Optional.empty();
+
+            return Optional.of(new ModLoaderData(
+                    v,
+                    VersionType.from(version.getType()),
+                    null,
+                    this
+            ));
+        }
     };
 
     /**
@@ -167,6 +196,7 @@ public enum ModLoader {
      * @param json the launch JSON to inspect
      * @return an optional with the modloader data if the loader is found or empty if no loader is found
      */
+    @NotNull
     protected abstract Optional<ModLoaderData> getModLoaderData(JsonObject json);
 
     /**
@@ -175,9 +205,15 @@ public enum ModLoader {
      * @param json the parsed JSON object
      * @return an optional with the modloader data if the loader is found or empty if no loader is found
      */
+    @NotNull
     public static Optional<ModLoaderData> findModLoader(JsonObject json) {
         for (ModLoader loader : values()) {
-            Optional<ModLoaderData> data = loader.getModLoaderData(json);
+            Optional<ModLoaderData> data;
+            try {
+                data = loader.getModLoaderData(json);
+            } catch (Exception e) {
+                data = Optional.empty();
+            }
             if (data.isPresent()) {
                 return data;
             }
@@ -192,6 +228,7 @@ public enum ModLoader {
      * @return an optional with the modloader data if the loader is found or empty if no loader is found
      * @throws JsonSyntaxException if the json is invalid
      */
+    @NotNull
     public static Optional<ModLoaderData> findModLoader(String jsonString) throws JsonSyntaxException {
         JsonObject parsed = GSON.fromJson(jsonString, JsonObject.class);
         return findModLoader(parsed);
@@ -205,6 +242,7 @@ public enum ModLoader {
      * @throws IOException if the file could not be read
      * @throws JsonSyntaxException if the file contains invalid json
      */
+    @NotNull
     public static Optional<ModLoaderData> findModLoader(Path pathToJson) throws IOException, JsonSyntaxException {
         String content = new String(Files.readAllBytes(pathToJson), StandardCharsets.UTF_8);
         return findModLoader(content);
@@ -218,6 +256,7 @@ public enum ModLoader {
      * @throws IOException if the file could not be read
      * @throws JsonSyntaxException if the file contains invalid json
      */
+    @NotNull
     public static Optional<ModLoaderData> findModLoader(File jsonFile) throws IOException, JsonSyntaxException {
         return findModLoader(jsonFile.toPath());
     }

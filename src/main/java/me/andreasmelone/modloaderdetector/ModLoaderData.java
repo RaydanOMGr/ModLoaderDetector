@@ -1,32 +1,41 @@
 package me.andreasmelone.modloaderdetector;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Objects;
 
 public class ModLoaderData {
-    private final String minecraftVersion;
-    private final VersionType minecraftVersionType;
-    private final String loaderVersion;
-    private final ModLoader loader;
+    @NotNull private final String minecraftVersion;
+    @NotNull private final VersionType minecraftVersionType;
+    @Nullable private final String loaderVersion;
+    @NotNull private final ModLoader loader;
 
-    public ModLoaderData(String minecraftVersion, VersionType minecraftVersionType, String loaderVersion, ModLoader loader) {
+    public ModLoaderData(@NotNull String minecraftVersion,
+                         @NotNull VersionType minecraftVersionType,
+                         @Nullable String loaderVersion, @NotNull ModLoader loader) {
         this.minecraftVersion = minecraftVersion;
         this.minecraftVersionType = minecraftVersionType;
         this.loaderVersion = loaderVersion;
         this.loader = loader;
     }
 
+    @NotNull
     public String getMinecraftVersion() {
         return minecraftVersion;
     }
 
+    @NotNull
     public VersionType getMinecraftVersionType() {
         return minecraftVersionType;
     }
 
+    @Nullable
     public String getLoaderVersion() {
         return loaderVersion;
     }
 
+    @NotNull
     public ModLoader getLoader() {
         return loader;
     }
@@ -35,7 +44,10 @@ public class ModLoaderData {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         ModLoaderData that = (ModLoaderData) o;
-        return Objects.equals(minecraftVersion, that.minecraftVersion) && minecraftVersionType == that.minecraftVersionType && Objects.equals(loaderVersion, that.loaderVersion) && loader == that.loader;
+        return Objects.equals(minecraftVersion, that.minecraftVersion)
+                && minecraftVersionType == that.minecraftVersionType
+                && Objects.equals(loaderVersion, that.loaderVersion)
+                && loader == that.loader;
     }
 
     @Override
